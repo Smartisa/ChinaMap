@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ECharts">
+    <meta name="author" content="kener.linfeng@gmail.com">
+    <title>ECharts · Example</title>
+	
+<script src="../js/echarts.js"></script>
+<script src="../js/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+    <div id="chart" class="chart" style="height: 530px;"></div>
+	
+	<script type="text/javascript">
+        // 基于准备好的dom，初始化echarts图表
+        var myChart = echarts.init(document.getElementById('chart')); 
+        
+      //各省份的地图json文件
+        var provinces = {
+            '上海': 'json/data-1482909900836-H1BC_1WHg.json',
+            '河北': 'json/data-1482909799572-Hkgu_yWSg.json',
+            '山西': 'json/data-1482909909703-SyCA_JbSg.json',
+            '内蒙古': 'json/data-1482909841923-rkqqdyZSe.json',
+            '辽宁': 'json/data-1482909836074-rJV9O1-Hg.json',
+            '吉林': 'json/data-1482909832739-rJ-cdy-Hx.json',
+            '黑龙江': 'json/data-1482909803892-Hy4__J-Sx.json',
+            '江苏': 'json/data-1482909823260-HkDtOJZBx.json',
+            '浙江': 'json/data-1482909960637-rkZMYkZBx.json',
+            '安徽': 'json/data-1482909768458-HJlU_yWBe.json',
+            '福建': 'json/data-1478782908884-B1H6yezWe.json',
+            '江西': 'json/data-1482909827542-r12YOJWHe.json',
+            '山东': 'json/data-1482909892121-BJ3auk-Se.json',
+            '河南': 'json/data-1482909807135-SJPudkWre.json',
+            '湖北': 'json/data-1482909813213-Hy6u_kbrl.json',
+            '湖南': 'json/data-1482909818685-H17FOkZSl.json',
+            '广东': 'json/data-1482909784051-BJgwuy-Sl.json',
+            '广西': 'json/data-1482909787648-SyEPuJbSg.json',
+            '海南': 'json/data-1482909796480-H12P_J-Bg.json',
+            '四川': 'json/data-1482909931094-H17eKk-rg.json',
+            '贵州': 'json/data-1482909791334-Bkwvd1bBe.json',
+            '云南': 'json/data-1482909957601-HkA-FyWSx.json',
+            '西藏': 'json/data-1482927407942-SkOV6Qbrl.json',
+            '陕西': 'json/data-1482909918961-BJw1FyZHg.json',
+            '甘肃': 'json/data-1482909780863-r1aIdyWHl.json',
+            '青海': 'json/data-1482909853618-B1IiOyZSl.json',
+            '宁夏': 'json/data-1482909848690-HJWiuy-Bg.json',
+            '新疆': 'json/data-1482909952731-B1YZKkbBx.json',
+            '北京': 'json/data-1482818963027-Hko9SKJrg.json',
+            '天津': 'json/data-1482909944620-r1-WKyWHg.json',
+            '重庆': 'json/data-1482909775470-HJDIdk-Se.json',
+            '香港': 'json/data-1461584707906-r1hSmtsx.json',
+            '澳门': 'json/data-1482909771696-ByVIdJWBx.json'
+        };
+
+        //各省份的数据
+        var allData = [{
+            name: '北京'
+        }, {
+            name: '天津'
+        }, {
+            name: '上海'
+        }, {
+            name: '重庆'
+        }, {
+            name: '河北'
+        }, {
+            name: '河南'
+        }, {
+            name: '云南'
+        }, {
+            name: '辽宁'
+        }, {
+            name: '黑龙江'
+        }, {
+            name: '湖南'
+        }, {
+            name: '安徽'
+        }, {
+            name: '山东'
+        }, {
+            name: '新疆'
+        }, {
+            name: '江苏'
+        }, {
+            name: '浙江'
+        }, {
+            name: '江西'
+        }, {
+            name: '湖北'
+        }, {
+            name: '广西'
+        }, {
+            name: '甘肃'
+        }, {
+            name: '山西'
+        }, {
+            name: '内蒙古'
+        }, {
+            name: '陕西'
+        }, {
+            name: '吉林'
+        }, {
+            name: '福建'
+        }, {
+            name: '贵州'
+        }, {
+            name: '广东'
+        }, {
+            name: '青海'
+        }, {
+            name: '西藏'
+        }, {
+            name: '四川'
+        }, {
+            name: '宁夏'
+        }, {
+            name: '海南'
+        }, {
+            name: '台湾'
+        }, {
+            name: '香港'
+        }, {
+            name: '澳门'
+        }];
+        for (var i = 0; i < allData.length; i++) {
+            allData[i].value = Math.round(Math.random() * 100);
+        }
+
+
+        loadMap('json/data-1527045631990-r1dZ0IM1X.json', 'china');//初始化全国地图
+
+        var timeFn = null;
+
+        //单击切换到省级地图，当mapCode有值,说明可以切换到下级地图
+        myChart.on('click', function(params) {
+            clearTimeout(timeFn);
+            //由于单击事件和双击事件冲突，故单击的响应事件延迟250毫秒执行
+            timeFn = setTimeout(function() {
+                var name = params.name; //地区name
+                var mapCode = provinces[name]; //地区的json数据
+                if (!mapCode) {
+                    alert('无此区域地图显示');
+                    return;
+                }
+
+                loadMap(mapCode, name);
+                
+            }, 250);
+        });
+
+
+        // 绑定双击事件，返回全国地图
+        myChart.on('dblclick', function(params) {
+            //当双击事件发生时，清除单击事件，仅响应双击事件
+            clearTimeout(timeFn);
+            
+            //返回全国地图
+            loadMap('json/data-1527045631990-r1dZ0IM1X.json', 'china');
+        });
+
+        /**
+         获取对应的json地图数据，然后向echarts注册该区域的地图，最后加载地图信息
+         @params {String} mapCode:json数据的地址
+         @params {String} name: 地图名称
+         */
+        function loadMap(mapCode, name) {
+            $.get(mapCode, function(data) {
+                if (data) {
+                    echarts.registerMap(name, data);
+                    var option = {
+                    	    title: {
+                    	        text: '地图下钻',
+                    	        subtext: '双击返回中国地图',
+                    	        left: 'center'
+                    	    },
+                    	    toolbox: {
+                    	        feature: {
+                    	            dataView: {show: true, readOnly: false},
+                    	            magicType: {show: true, type: ['line', 'map']},
+                    	            restore: {show: true},
+                    	            saveAsImage: {show: true}
+                    	        }
+                    	    },
+                        tooltip: {
+                            show: true,
+                            formatter: function(params) {
+                                if (params.data) return params.name + '：' + params.data['value']
+                            },
+                        },
+                        visualMap: {
+                            type: 'continuous',
+                            text: ['', ''],
+                            showLabel: true,
+                            left: '50',
+                            min: 0,
+                            max: 100,
+                            inRange: {
+                                color: ['#edfbfb', '#b7d6f3', '#40a9ed', '#3598c1', '#215096', ]
+                            },
+                            splitNumber: 0
+                        },
+                        series: [{
+                            name: 'MAP',
+                            type: 'map',
+                            mapType: name,
+                            selectedMode: 'false',//是否允许选中多个区域
+                            label: {
+                                normal: {
+                                    show: true
+                                },
+                                emphasis: {
+                                    show: true
+                                }
+                            },
+                            data: allData
+                        }]
+                    };
+                    myChart.setOption(option);
+                    // curMap = {
+                    //     mapCode: mapCode,
+                    //     mapName: name
+                    // };
+                } else {
+                    alert('无法加载该地图');
+                }
+            });
+        }
+</script>
+</body>
+</html>
